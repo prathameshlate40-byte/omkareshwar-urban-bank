@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Disaster Management Dashboard</title>
+<style>
+  body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    margin: 0;
+    background: #eef2f7;
+    color: #333;
+  }
+  header {
+    background: #004085;
+    color: white;
+    padding: 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  header h1 {
+    margin: 0;
+    font-size: 1.5rem;
+  }
+  .date-temp {
+    text-align: right;
+  }
+  .date-temp div {
+    margin: 6px 0;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 8px;
+  }
+  main {
+    display: flex;
+    gap: 20px;
+    padding: 20px;
+  }
+  .sidebar {
+    width: 280px;
+    background: white;
+    border-radius: 8px;
+    padding: 15px;
+    box-shadow: 0 3px 7px rgba(0,0,0,0.1);
+  }
+  .dashboard {
+    flex-grow: 1;
+    background: white;
+    border-radius: 8px;
+    padding: 25px;
+    box-shadow: 0 3px 7px rgba(0,0,0,0.1);
+  }
+  h2 {
+    margin-top: 0;
+    color: #004085;
+  }
+  ul {
+    padding-left: 20px;
+  }
+  .weather-widget, .rain-widget, .disaster-widget {
+    color: white;
+    margin-top: 15px;
+    padding: 15px;
+    border-radius: 6px;
+    text-align: center;
+  }
+  .weather-widget {
+    background: #007bff;
+  }
+  .rain-widget {
+    background: #17a2b8;
+  }
+  .disaster-widget {
+    background: #dc3545;
+  }
+  .temp, .rain, .alert {
+    font-size: 2rem;
+    margin: 10px 0;
+  }
+  .alert-message {
+    font-weight: bold;
+  }
+  .forecast {
+    margin-top: 20px;
+    background: #f1f5f9;
+    padding: 15px;
+    border-radius: 8px;
+  }
+  .forecast-day {
+    background: white;
+    margin-bottom: 12px;
+    padding: 12px;
+    border-radius: 6px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  }
+  .forecast-day h3 {
+    margin: 0 0 8px 0;
+    color: #004085;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Disaster Management Dashboard</h1>
+  <div class="date-temp">
+    <div id="currentDate">Date: --/--/----</div>
+    <div class="weather-widget">
+      <div>Current Temperature</div>
+      <div class="temp" id="temperature">-- °C</div>
+    </div>
+  </div>
+</header>
+
+<main>
+  <nav class="sidebar">
+    <h2>Navigation</h2>
+    <ul>
+      <li>Problem Statement</li>
+      <li>Objectives</li>
+      <li>Proposed Solution</li>
+      <li>Key Features</li>
+      <li>Benefits</li>
+      <li>Implementation Plan</li>
+      <li>Target Users</li>
+    </ul>
+  </nav>
+  <section class="dashboard">
+    <h2>Real-Time Updates</h2>
+    <p><strong>Problem Statement:</strong> Current systems lack real-time decision support and data integration during disasters.</p>
+    <p><strong>Objectives:</strong> Build an AI IoT-based disaster management platform for alerts, SOS, and evacuation planning.</p>
+    <p><strong>Proposed Solution:</strong> Location-based alerts, risk heatmaps, SOS system, relief distribution tracking, and community reporting.</p>
+    <p><strong>Key Features:</strong> Faster response, centralized decisions, improved awareness, and scalable for different disaster types.</p>
+
+    <div class="forecast">
+      <h2>7-Day Rain Prediction & Alert</h2>
+      <div id="forecastList"></div>
+    </div>
+  </section>
+</main>
+
+<script>
+  function formatDate(date) {
+    const d = date.getDate().toString().padStart(2, '0');
+    const m = (date.getMonth() + 1).toString().padStart(2, '0');
+    const y = date.getFullYear();
+    return `${d}/${m}/${y}`;
+  }
+  document.getElementById('currentDate').textContent = 'Date: ' + formatDate(new Date());
+
+  function randomTemperature(min = 20, max = 40) {
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+  }
+  document.getElementById('temperature').textContent = randomTemperature() + ' °C';
+
+  // Generate 7 days forecast from today
+  function generateForecast() {
+    const forecast = [];
+    const today = new Date();
+    for (let i = 0; i < 7; i++) {
+      const date = new Date(today);
+      date.setDate(today.getDate() + i);
+      const rainMm = +(Math.random() * 100).toFixed(1); // Rain mm
+      let alert = 'No Immediate Threat';
+      let message = 'Conditions are normal.';
+
+      if (rainMm > 75) {
+        alert = 'Severe Flood Warning';
+        message = 'Heavy rains expected, evacuate low-lying areas immediately.';
+      } else if (rainMm > 40) {
+        alert = 'Flood Watch';
+        message = 'Moderate rains expected, stay alert for possible flooding.';
+      }
+
+      forecast.push({
+        date: formatDate(date),
+        rain: rainMm,
+        alert: alert,
+        message: message
+      });
+    }
+    return forecast;
+  }
+
+  // Render forecast in the dashboard
+  function renderForecast() {
+    const forecastList = document.getElementById('forecastList');
+    const forecast = generateForecast();
+    forecastList.innerHTML = '';
+    forecast.forEach(day => {
+      const dayDiv = document.createElement('div');
+      dayDiv.className = 'forecast-day';
+      dayDiv.innerHTML = `
+        <h3>${day.date}</h3>
+        <p>Rain Prediction: <strong>${day.rain} mm</strong></p>
+        <p style="color:${day.alert === 'No Immediate Threat' ? 'green' : 'red'};">
+          Alert: <strong>${day.alert}</strong><br />
+          ${day.message}
+        </p>
+      `;
+      forecastList.appendChild(dayDiv);
+    });
+  }
+
+  renderForecast();
+</script>
+
+</body>
+</html>
